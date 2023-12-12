@@ -18,3 +18,7 @@ class BookingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookings
         fields = '__all__'
+        
+class SpecialtyCountSerializer(serializers.Serializer):
+    specialty = serializers.CharField()
+    total = serializers.IntegerField()

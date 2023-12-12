@@ -15,7 +15,7 @@ class Doctor(models.Model):
     name = models.CharField(max_length=50)
     specialty = models.CharField(max_length=50)
     available = models.BooleanField(default=True)
-    ranking = models.DecimalField(max_digits=3, decimal_places=2,null=True, blank=True)
+    ranking = models.DecimalField(max_digits=3, decimal_places=1,null=True, blank=True)
     class Meta:
         db_table = 'doctor'
         

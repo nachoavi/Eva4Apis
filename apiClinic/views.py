@@ -1,7 +1,10 @@
+from django.db.models import Count
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework import generics,mixins
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from .serializers import SpecialtyCountSerializer
 from apiClinic.models import Patient,Doctor,Bookings
 from apiClinic.serializers import PatientSerializer,DoctorSerializer,BookingsSerializer
 
@@ -56,6 +59,10 @@ class DoctorDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Dest
     def delete(self,request,pk):
         return self.delete(request,pk)
     
+class TopDoctorsList(generics.ListAPIView):
+    queryset = Doctor.objects.order_by('-ranking').exclude(ranking__isnull=True)
+    serializer_class = DoctorSerializer
+    
     
 class BookingsList(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
     queryset = Bookings.objects.all()
@@ -69,10 +76,10 @@ class BookingsList(mixins.ListModelMixin,mixins.CreateModelMixin,generics.Generi
         serializer.is_valid(raise_exception=True)
 
         doctor_id = serializer.validated_data['doctor'].id
-        # Obtener el doctor asociado a la reserva
+        
         doctor = Doctor.objects.get(id=doctor_id)
 
-        # Actualizar la propiedad 'available' del doctor a False
+        
         doctor.available = False
         doctor.save()
 
@@ -95,8 +102,14 @@ class BookingDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Des
         return self.delete(request,pk)
     
 
+class TopSpecialtiesList(APIView):
+    def get(self, request):
+        # Realiza el conteo de consultas por especialidad y ordénalas en orden descendente
+        queryset = Bookings.objects.values('specialty').annotate(total=Count('specialty')).order_by('-total')
 
-
+        # Serializa directamente el queryset con un nuevo serializador
+        serializer = SpecialtyCountSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 
