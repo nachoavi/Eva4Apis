@@ -104,10 +104,10 @@ class BookingDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Des
 
 class TopSpecialtiesList(APIView):
     def get(self, request):
-        # Realiza el conteo de consultas por especialidad y ordénalas en orden descendente
+       
         queryset = Bookings.objects.values('specialty').annotate(total=Count('specialty')).order_by('-total')
 
-        # Serializa directamente el queryset con un nuevo serializador
+        
         serializer = SpecialtyCountSerializer(queryset, many=True)
         return Response(serializer.data)
 
