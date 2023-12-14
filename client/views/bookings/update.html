@@ -1,0 +1,175 @@
+<!-- update_booking.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Actualizar Reservación</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Actualizar Reservación</h2>
+
+        <form id="updateBookingForm">
+            <div class="form-group mt-4">
+                <label for="doctor">Doctor:</label>
+                <select
+                    type="text"
+                    class="form-control"
+                    id="doctor"
+                    required
+                >
+                </select>
+            </div>
+            <div class="form-group mt-4">
+                <label for="patient">Paciente:</label>
+                <select
+                    type="text"
+                    class="form-control"
+                    id="patient"
+                    required
+                >
+                </select>
+            </div>
+            <div class="form-group mt-4">
+                <label for="date">Fecha:</label>
+                <input
+                    type="date"
+                    class="form-control"
+                    id="date"
+                    required
+                />
+            </div>
+            <div class="form-group mt-4">
+                <label for="hour">Hora:</label>
+                <input
+                    type="time"
+                    class="form-control"
+                    id="hour"
+                    required
+                />
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">
+                Actualizar Reservación
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const updateBookingForm = document.getElementById("updateBookingForm");
+        const doctorInput = document.getElementById("doctor");
+        const patientInput = document.getElementById("patient");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookingId = urlParams.get("id");
+        const doctorId = urlParams.get("doctor");
+        const patientId = urlParams.get("patient");
+        const dateParam = urlParams.get("date");
+        const hourParam = urlParams.get("hour");
+
+
+        document.getElementById("date").value = dateParam;
+        document.getElementById("hour").value = hourParam;
+
+        updateBookingForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const selectedDoctorId = doctorInput.value;
+            const selectedDoctor = await fetchDoctorDetails(selectedDoctorId);
+            const doctorSpecialty = selectedDoctor ? selectedDoctor.specialty : '';
+
+            console.log(bookingId)
+            console.log(document.getElementById("date").value)
+            console.log(document.getElementById("hour").value)
+            console.log(doctorSpecialty)
+            console.log(selectedDoctorId)
+            console.log(patientInput.value)
+
+
+            const updatedBooking = {
+                id: bookingId, 
+                booking_date: document.getElementById("date").value,
+                booking_hour: document.getElementById("hour").value,
+                specialty: doctorSpecialty,
+                doctor: selectedDoctorId,
+                patient: patientInput.value,
+            };
+
+            try {
+                const response = await fetch(
+                    `http://127.0.0.1:8000/bookings/${bookingId}`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(updatedBooking),
+                    }
+                );
+
+                if (response.ok) {
+                    window.location.href = "/client/views/bookings/booking.html"
+                } else {
+                    console.error("Error updating booking");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        });
+
+        fillFormWithDoctorAndPatientData(doctorId, patientId);
+        
+        async function fillFormWithDoctorAndPatientData(selectedDoctorId, selectedPatientId) {
+            try {
+                const doctorsResponse = await fetch("http://127.0.0.1:8000/doctors/", {
+                    method: "GET",
+                });
+                const doctorsData = await doctorsResponse.json();
+
+                const patientsResponse = await fetch("http://127.0.0.1:8000/patients/", {
+                    method: "GET",
+                });
+                const patientsData = await patientsResponse.json();
+
+                doctorInput.innerHTML = doctorsData.map(
+                    (doctor) => `<option value="${doctor.id}" ${
+                        selectedDoctorId === doctor.id ? "selected" : ""
+                    }>${doctor.name} - ${doctor.specialty}</option>`
+                ).join("");
+
+                patientInput.innerHTML = patientsData.map(
+                    (patient) => `<option value="${patient.id}" ${
+                        selectedPatientId === patient.id ? "selected" : ""
+                    }>${patient.name}</option>`
+                ).join("");
+            } catch (error) {
+                console.error("Error fetching doctor and patient data:", error);
+            }
+        }
+
+        async function fetchDoctorDetails(doctorId) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/doctors/${doctorId}`);
+                return response.json();
+            } catch (error) {
+                console.error("Error fetching doctor details:", error);
+                return null;
+            }
+        }
+    </script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"
+    ></script>
+</body>
+</html>

@@ -99,7 +99,7 @@ class BookingDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Des
         return self.update(request,pk)
     
     def delete(self,request,pk):
-        return self.delete(request,pk)
+        return self.destroy(request,pk)
     
 
 class TopSpecialtiesList(APIView):
