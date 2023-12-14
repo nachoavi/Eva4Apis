@@ -1,0 +1,100 @@
+<!-- update_patient.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Actualizar Paciente</title>
+    </head>
+    <body>
+        <div class="container mt-5">
+            <h2 class="mb-4">Actualizar Paciente</h2>
+
+            <form id="updatePatientForm">
+                <div class="form-group mt-4">
+                    <label for="nombre">Nombre:</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="name"
+                        placeholder="Ingrese el nombre"
+                        required
+                    />
+                </div>
+                <div class="form-group mt-4">
+                    <label for="apellido">Apellido:</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="lastname"
+                        placeholder="Ingrese el apellido"
+                        required
+                    />
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-4">
+                    Actualizar Paciente
+                </button>
+            </form>
+        </div>
+
+        <script>
+            const updatePatientForm =
+                document.getElementById("updatePatientForm");
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const idParam = urlParams.get("id");
+            const nameParam = urlParams.get("name");
+            const lastnameParam = urlParams.get("lastname");
+
+            document.getElementById("name").value = nameParam;
+            document.getElementById("lastname").value = lastnameParam;
+
+            updatePatientForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const nameInput = document.getElementById("name").value;
+                const lastnameInput = document.getElementById("lastname").value;
+
+                try {
+                    const updatedPatient = {
+                        name: nameInput,
+                        lastname: lastnameInput,
+                    };
+
+                    const response = await fetch(
+                        `http://127.0.0.1:8000/patients/${idParam}`,
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(updatedPatient),
+                        }
+                    );
+
+                    if (response.ok) {
+                        window.location.href = "/client/views/patients/patients.html";
+                    } else {
+                        console.error("Error to update patient");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+            });
+        </script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"
+        ></script>
+    </body>
+</html>
