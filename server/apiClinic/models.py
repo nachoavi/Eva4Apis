@@ -9,7 +9,7 @@ class Patient(models.Model):
         
     def __str__(self):
         return self.name + ' ' + self.lastname
-
+ 
 
 class Doctor(models.Model):
     name = models.CharField(max_length=50)
