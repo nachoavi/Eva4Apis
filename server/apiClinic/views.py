@@ -47,7 +47,6 @@ class PatientDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Des
 class TopPatientsList(APIView):
     def get(self, request):
         queryset = Bookings.objects.values('patient__id', 'patient__name', 'patient__lastname').annotate(total_hours=Count('booking_hour')).order_by('-total_hours')        
-        
         serializer = TopPatientsSerializer(queryset, many=True)
         return Response(serializer.data)
     
