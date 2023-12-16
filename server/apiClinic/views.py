@@ -106,6 +106,7 @@ class BookingsList(mixins.ListModelMixin,mixins.CreateModelMixin,generics.Generi
         doctor_id = serializer.validated_data['doctor'].id
         
         doctor = Doctor.objects.get(id=doctor_id)
+        print(doctor)
         if not doctor.available:
             return Response({'error': 'El doctor no esta disponible.'}, status=status.HTTP_400_BAD_REQUEST)
             

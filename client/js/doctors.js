@@ -133,7 +133,7 @@ const fetchDataAndRender = async () => {
     </div>
     `;
 
-    const showTopButton = document.getElementById("showTopButton");
+const showTopButton = document.getElementById("showTopButton");
 const topDoctorsTableContainer = document.getElementById("topDoctorsTableContainer");
 const topDoctorsTable = document.getElementById("topDoctorsTable");
 
