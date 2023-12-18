@@ -133,6 +133,20 @@ class BookingDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Des
         return self.destroy(request,pk)
     
 
+class TopBookingDate(APIView):
+    def get(self, request):
+        top_date = Bookings.objects.values('booking_date').annotate(total_visits=Count('booking_date')).order_by('-total_visits').first()
+
+        if top_date:
+            response_data = {
+                'top_date': top_date['booking_date'],
+                'total_visits': top_date['total_visits']
+            }
+            return Response(response_data)
+        else:
+            return Response({'message': 'No hay datos de reservas.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+
 class TopSpecialtiesList(APIView):
     def get(self, request):
         queryset = Bookings.objects.values('specialty').annotate(total=Count('specialty')).order_by('-total')

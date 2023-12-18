@@ -35,13 +35,19 @@ const addNewDoctor = async (name, specialty, available, ranking) => {
     };
 
     try {
-        await fetch("http://127.0.0.1:8000/doctors/", {
+        const response = await fetch("http://127.0.0.1:8000/doctors/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(doctor),
         });
+
+        const data = await response.json()
+
+        if (data.error) {
+            alert(data.error)
+        }
 
         fetchDataAndRender();
     } catch (error) {
@@ -74,64 +80,112 @@ const fetchDataAndRender = async () => {
         });
 
         dataDoctors = await doctorsResponse.json();
+
     } catch (error) {
         console.error("Error:", error);
     }
 
-    content.innerHTML = `
-    <div class="container mt-5">
-        <h2 class="mb-4">Lista de Doctores</h2>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Especialidad</th>
-                    <th>Disponibilidad</th>
-                    <th>Ranking</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${generateTableRows(dataDoctors)}
-            </tbody>
-        </table>
-    </div>
 
-    <div class="container mt-5">
-        <h2 class="mb-4">Agregar Doctor</h2>
-        <form id="doctorForm">
-            <div class="form-group mt-4">
-                <label for="nombre">Nombre:</label>
-                <input type="text" class="form-control" id="nombre" placeholder="Ingrese el nombre" required>
+    
+    if (dataDoctors.message) {
+        content.innerHTML = `
+        <div class="container mt-5">
+            <h2 class="mb-4">Lista de Doctores</h2>
+            <p>${dataDoctors.message}</p>
+        </div>
+    
+        <div class="container mt-5">
+            <h2 class="mb-4">Agregar Doctor</h2>
+            <form id="doctorForm">
+                <div class="form-group mt-4">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" class="form-control" id="nombre" placeholder="Ingrese el nombre" required>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="especialidad">Especialidad:</label>
+                    <input type="text" class="form-control" id="especialidad" placeholder="Ingrese la especialidad" required>
+                </div>
+                <div class="form-check mt-4">
+                    <input type="checkbox" class="form-check-input" id="disponible" checked>
+                    <label class="form-check-label" for="disponible">Disponible</label>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="ranking">Ranking:</label>
+                    <input type="number" class="form-control" step="any" id="ranking" placeholder="Ingrese el ranking">
+                </div>
+                <button type="submit" class="btn btn-success mt-4">Agregar Doctor</button>
+            </form>
+        </div>
+    
+        <div class="container mt-5">
+            <button type="button" class="btn btn-primary" id="showTopButton">Mostrar Top</button>
+            <button type="button" class="btn btn-secondary" id="hideTopButton" style="display:none;">Ocultar Top</button>
+            <div id="topDoctorsTableContainer" style="display:none;">
+                <h2 class="mb-4">Top Doctores</h2>
+                <table class="table table-bordered" id="topDoctorsTable">
+                    <!-- Table for Top Doctors will be generated here -->
+                </table>
             </div>
-            <div class="form-group mt-4">
-                <label for="especialidad">Especialidad:</label>
-                <input type="text" class="form-control" id="especialidad" placeholder="Ingrese la especialidad" required>
-            </div>
-            <div class="form-check mt-4">
-                <input type="checkbox" class="form-check-input" id="disponible" checked>
-                <label class="form-check-label" for="disponible">Disponible</label>
-            </div>
-            <div class="form-group mt-4">
-                <label for="ranking">Ranking:</label>
-                <input type="number" class="form-control" step="any" id="ranking" placeholder="Ingrese el ranking">
-            </div>
-            <button type="submit" class="btn btn-success mt-4">Agregar Doctor</button>
-        </form>
-    </div>
-
-    <div class="container mt-5">
-        <button type="button" class="btn btn-primary" id="showTopButton">Mostrar Top</button>
-        <button type="button" class="btn btn-secondary" id="hideTopButton" style="display:none;">Ocultar Top</button>
-        <div id="topDoctorsTableContainer" style="display:none;">
-            <h2 class="mb-4">Top Doctores</h2>
-            <table class="table table-bordered" id="topDoctorsTable">
-                <!-- Table for Top Doctors will be generated here -->
+        </div>
+        `;
+    } else {
+        content.innerHTML = `
+        <div class="container mt-5">
+            <h2 class="mb-4">Lista de Doctores</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Especialidad</th>
+                        <th>Disponibilidad</th>
+                        <th>Ranking</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${generateTableRows(dataDoctors)}
+                </tbody>
             </table>
         </div>
-    </div>
-    `;
+    
+        <div class="container mt-5">
+            <h2 class="mb-4">Agregar Doctor</h2>
+            <form id="doctorForm">
+                <div class="form-group mt-4">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" class="form-control" id="nombre" placeholder="Ingrese el nombre" required>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="especialidad">Especialidad:</label>
+                    <input type="text" class="form-control" id="especialidad" placeholder="Ingrese la especialidad" required>
+                </div>
+                <div class="form-check mt-4">
+                    <input type="checkbox" class="form-check-input" id="disponible" checked>
+                    <label class="form-check-label" for="disponible">Disponible</label>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="ranking">Ranking:</label>
+                    <input type="number" class="form-control" step="any" id="ranking" placeholder="Ingrese el ranking">
+                </div>
+                <button type="submit" class="btn btn-success mt-4">Agregar Doctor</button>
+            </form>
+        </div>
+    
+        <div class="container mt-5">
+            <button type="button" class="btn btn-primary" id="showTopButton">Mostrar Top</button>
+            <button type="button" class="btn btn-secondary" id="hideTopButton" style="display:none;">Ocultar Top</button>
+            <div id="topDoctorsTableContainer" style="display:none;">
+                <h2 class="mb-4">Top Doctores</h2>
+                <table class="table table-bordered" id="topDoctorsTable">
+                    <!-- Table for Top Doctors will be generated here -->
+                </table>
+            </div>
+        </div>
+        `;
+    }
+
+
 
 const showTopButton = document.getElementById("showTopButton");
 const topDoctorsTableContainer = document.getElementById("topDoctorsTableContainer");

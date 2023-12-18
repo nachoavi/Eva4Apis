@@ -12,4 +12,5 @@ urlpatterns = [
     path('bookings/',views.BookingsList.as_view()),
     path('bookings/<int:pk>',views.BookingDetail.as_view()),
     path('bookings/top-specialties/', views.TopSpecialtiesList.as_view()),
+    path('bookings/top-booking-date/', views.TopBookingDate.as_view()),
 ] 

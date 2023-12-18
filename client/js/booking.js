@@ -99,62 +99,122 @@ const fetchDataAndRender = async () => {
 
         dataPatients = await patients.json();
 
-        if (bookingData.message) {
-            bookingData = [{
-                ok: false,
-                message: bookingData.message
-            }]
+        try {
+            const bookingWithDoctorData = bookingData.map((booking) => {
+                const doctorInfo = dataDoctors.find((doctor) => doctor.id === booking.doctor);
+                return {
+                    id: booking.id,
+                    doctor: doctorInfo,
+                    specialty: doctorInfo ? doctorInfo.specialty : null,
+                    patient: booking.patient,
+                    hour: booking.booking_hour,
+                    date: booking.booking_date,
+                };
+               
+            });
+    
+    
+            bookingWithData = bookingWithDoctorData.map((booking) => {
+                const patientInfo = dataPatients.find((patient) => patient.id === booking.patient);
+                return {
+                    ...booking,
+                    patient: patientInfo,
+                };
+            });
+            
+        } catch (error) {
+            console.log("No data")
+            
         }
-
-
-        const bookingWithDoctorData = bookingData.map((booking) => {
-
-            if (!booking) {
-                return {
-                    ok: booking.ok,
-                    message: booking.message
-                }
-            } 
-
-            const doctorInfo = dataDoctors.find((doctor) => doctor.id === booking.doctor);
-            return {
-                id: booking.id,
-                doctor: doctorInfo,
-                specialty: doctorInfo ? doctorInfo.specialty : null,
-                patient: booking.patient,
-                hour: booking.booking_hour,
-                date: booking.booking_date,
-            };
-           
-        });
-
-
-        bookingWithData = bookingWithDoctorData.map((booking) => {
-            if (!booking) {
-                return {
-                    ok: booking.ok,
-                    message: booking.message
-                }
-            }
-            const patientInfo = dataPatients.find((patient) => patient.id === booking.patient);
-            return {
-                ...booking,
-                patient: patientInfo,
-            };
-        });
-
-
 
     } catch (error) {
         console.error("Error:", error);
     }
 
-    console.log(bookingWithData)
-    if (!bookingWithData[0][0]) {
+
+    if (dataDoctors.message) {
+        dataDoctors = [
+            {
+                name: dataDoctors.message,
+                specialty: dataDoctors.message
+            }
+        ]
+    }
+
+
+    if (dataPatients.message) {
+        dataPatients = [
+            {
+                name: dataPatients.message,
+                lastname: dataPatients.message
+            }
+        ]
+    }
+    if (bookingData.message ) {
+        console.log(dataDoctors)
         content.innerHTML = `
         <div class="container mt-5">
             <h2 class="mb-4">Reservas</h2>
-                    <table class="table table-bordered">
+            <p>${bookingData.message}</p>
+        </div>
+    
+        <div class="container mt-5">
+            <h2 class="mb-4">Crear reserva</h2>
+            <form id="bookingForm">
+                <div class="form-group mt-4">
+                    <label for="doctor">Doctor:</label>
+                    <select type="text" class="form-control" id="doctor" required>
+                        ${dataDoctors.map((doctor) => !doctor ? `<option value="${doctor.id}">${doctor.message}</option>` : `<option value="${doctor.id}">${doctor.name} - ${doctor.specialty}</option>`).join("")}
+                    </select>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="patient">Paciente:</label>
+                    <select type="text" class="form-control" id="patient" required>
+                    ${dataPatients.map((patient) => !patient ? `<option value="${patient.id}">${patient.message}</option>` : `<option value="${patient.id}">${patient.name} - ${patient.lastname}</option>`).join("")}
+
+                    </select>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="date">Fecha:</label>
+                    <input type="date" class="form-control" id="date" required>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="hour">Hora:</label>
+                    <input type="time" class="form-control" id="hour" required>
+                </div>
+                <button type="submit" class="btn btn-success mt-4">Agregar Reserva</button>
+            </form>
+        </div>
+    
+        <div class="container mt-5">
+            <button type="button" class="btn btn-primary" id="showTopButton">Top especialidades</button>
+            <button type="button" class="btn btn-secondary" id="hideTopButton" style="display:none;">Ocultar Top</button>
+            <div id="topDoctorsTableContainer" style="display:none;">
+                <h2 class="mb-4">Top especialidades</h2>
+                <table class="table table-bordered" id="topDoctorsTable">
+                </table>
+            </div>
+        </div>
+
+        <div class="container mt-5">
+            <button type="button" class="btn btn-primary" id="showVisitButton">Fecha con más visitas</button>
+            <button type="button" class="btn btn-secondary" id="hideVisitButton" style="display:none;">Ocultar</button>
+            <div id="topVisitTableContainer" style="display:none;">
+                <h2 class="mb-4">Fecha con más visitas</h2>
+                <table class="table table-bordered" id="topVisitTable">
+        
+                </table>
+            </div>
+        </div>
+    </div>
+        `;
+    
+    } else {
+        content.innerHTML = `
+        <div class="container mt-5">
+            <h2 class="mb-4">Reservas</h2>
+    
+            <table class="table table-bordered">
                     <thead>
                     <tr>
                         <th>ID</th>
@@ -170,6 +230,7 @@ const fetchDataAndRender = async () => {
                     ${generateTableRows(bookingWithData)}
                 </tbody>
             </table>
+
         </div>
     
         <div class="container mt-5">
@@ -200,21 +261,29 @@ const fetchDataAndRender = async () => {
         </div>
     
         <div class="container mt-5">
-            <button type="button" class="btn btn-primary" id="showTopButton">Mostrar Top</button>
+            <button type="button" class="btn btn-primary" id="showTopButton">Top especialidades</button>
             <button type="button" class="btn btn-secondary" id="hideTopButton" style="display:none;">Ocultar Top</button>
             <div id="topDoctorsTableContainer" style="display:none;">
                 <h2 class="mb-4">Top especialidades</h2>
                 <table class="table table-bordered" id="topDoctorsTable">
-                    <!-- Table for Top Doctors will be generated here -->
+                </table>
+            </div>
+        </div>
+
+
+        <div class="container mt-5">
+            <button type="button" class="btn btn-primary" id="showVisitButton">Fecha con más visitas</button>
+            <button type="button" class="btn btn-secondary" id="hideVisitButton" style="display:none;">Ocultar</button>
+            <div id="topVisitTableContainer" style="display:none;">
+                <h2 class="mb-4">Fecha con más visitas</h2>
+                <table class="table table-bordered" id="topVisitTable">
+        
                 </table>
             </div>
         </div>
         `;
-    
+
     }
-    
-
-
 
     const bookingForm = document.getElementById("bookingForm");
 
@@ -247,6 +316,11 @@ const fetchDataAndRender = async () => {
     const hideTopButton = document.getElementById("hideTopButton");
     const topDoctorsTableContainer = document.getElementById("topDoctorsTableContainer");
     const topDoctorsTable = document.getElementById("topDoctorsTable");
+
+    const showVisitButton = document.getElementById("showVisitButton");
+    const hideVisitButton = document.getElementById("hideVisitButton");
+    const topVisitTableContainer = document.getElementById("topVisitTableContainer");
+    const topVisitTable = document.getElementById("topVisitTable");
     
     showTopButton.addEventListener("click", async () => {
         try {
@@ -275,11 +349,46 @@ const fetchDataAndRender = async () => {
             console.error("Error fetching top specialties:", error);
         }
     });
+
+    showVisitButton.addEventListener("click", async () => {
+        try {
+            const topVisitResponse = await fetch("http://127.0.0.1:8000/bookings/top-booking-date/", {
+                method: "GET",
+            });
+    
+            const topVisitsData = await topVisitResponse.json();
+    
+            topVisitTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Total visitas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${generateVisitTableRows(topVisitsData)}
+                </tbody>
+            `;
+    
+            topVisitTableContainer.style.display = "block";
+            showVisitButton.style.display = "none";
+            hideVisitButton.style.display = "inline";
+        } catch (error) {
+            console.error("Error fetching top specialties:", error);
+        }
+    });
     
     hideTopButton.addEventListener("click", () => {
         topDoctorsTableContainer.style.display = "none";
         showTopButton.style.display = "inline";
         hideTopButton.style.display = "none";
+    });
+
+
+    hideVisitButton.addEventListener("click", () => {
+        topVisitTableContainer.style.display = "none";
+        showVisitButton.style.display = "inline";
+        hideVisitButton.style.display = "none";
     });
     
     const generateSpecialtiesTableRows = (topSpecialtiesData) => {
@@ -293,6 +402,29 @@ const fetchDataAndRender = async () => {
             `
             )
             .join("");
+    };
+
+
+    const generateVisitTableRows = (topVisitData) => {
+        console.log(topVisitData)
+        if (topVisitData.message) {
+            return `
+            
+            `
+
+            
+        } else{
+            return `
+
+            <tr>
+            <td>${topVisitData.top_date}</td>
+            <td>${topVisitData.total_visits}</td>
+        </tr>
+            
+            
+            `
+
+        }
     };
 };
 

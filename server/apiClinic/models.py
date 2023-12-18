@@ -27,7 +27,7 @@ class Doctor(models.Model):
 class Bookings(models.Model):
     booking_date = models.DateField()
     booking_hour = models.TimeField()
-    doctor = models.ForeignKey(Doctor,on_delete=models.PROTECT)
+    doctor = models.ForeignKey(Doctor,on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     specialty = models.CharField(max_length=60)
     class Meta:
